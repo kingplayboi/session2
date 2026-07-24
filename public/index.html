@@ -100,7 +100,6 @@
       <div class="tab" onclick="switchTab('qr')">📷 QR Code</div>
     </div>
 
-    <!-- PAIRING CODE SECTION -->
     <div class="section active" id="pairSection">
       <p class="hint">Enter your WhatsApp number with country code</p>
       <input type="tel" id="phone" placeholder="e.g. 254114283550" />
@@ -123,7 +122,6 @@
       <div class="error" id="pairError"></div>
     </div>
 
-    <!-- QR CODE SECTION -->
     <div class="section" id="qrSection">
       <p class="hint">Scan the QR code with WhatsApp → Linked Devices → Link a Device</p>
       <button id="qrBtn" onclick="startQR()">📷 Generate QR Code</button>
@@ -169,8 +167,6 @@
       document.getElementById('codeBox').style.display = 'none';
       document.getElementById('pairSessionBox').style.display = 'none';
       document.getElementById('pairConnecting').style.display = 'block';
-      if (pollInterval) clearInterval(pollInterval);
-      if (countdownInterval) clearInterval(countdownInterval);
 
       try {
         const res = await fetch('/pair', {
@@ -188,7 +184,6 @@
           return;
         }
 
-        // Poll for code then session
         pollInterval = setInterval(async () => {
           try {
             const statusRes = await fetch('/status/' + data.sessionId);
@@ -201,7 +196,6 @@
               document.getElementById('pairStatus').textContent = '⏳ Enter the code in WhatsApp now';
               btn.textContent = '✅ Code Generated!';
 
-              // Start countdown from when code was created
               const elapsed = Math.floor((Date.now() - status.codeAt) / 1000);
               let remaining = Math.max(0, 60 - elapsed);
               const timerEl = document.getElementById('pairTimer');
@@ -300,7 +294,6 @@
               btn.disabled = false;
               btn.textContent = '📷 Generate QR Code';
             } else if (waited >= 90) {
-              // Give up after 90 seconds of polling
               clearInterval(pollInterval);
               document.getElementById('qrSpinner').style.display = 'none';
               document.getElementById('qrError').textContent = '❌ Timed out. Render may be waking up — please try again.';
@@ -346,4 +339,3 @@
   </script>
 </body>
 </html>
-

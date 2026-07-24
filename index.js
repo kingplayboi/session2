@@ -5,10 +5,10 @@ import fetch from 'node-fetch';
 import pairRouter from './pair.js';
 import qrRouter from './qr.js';
 
-const app = express();
-app.use(express.static(path.join(__dirname, 'public')));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const app = express();
+app.use(express.static(path.join(__dirname, 'public')));
 const PORT = process.env.PORT || 8000;
 
 import('events').then(e => { e.EventEmitter.defaultMaxListeners = 500; });

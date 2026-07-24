@@ -97,4 +97,3 @@ await sock.sendMessage(sock.user.id, {
 });
 
 export default router;
-

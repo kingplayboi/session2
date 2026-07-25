@@ -22,12 +22,12 @@ router.get('/', async (req, res) => {
       res.status(504).send('QR timeout — please refresh');
     }
   }, 25000);
-  
+
   let retryCount = 0;
   const MAX_RETRIES = 3;
 
   async function initiateSession() {
-    const { version } = await fetchLatestBaileysVersion();   
+    const { version } = await fetchLatestBaileysVersion();
     const { state, saveCreds } = await useMultiFileAuthState(dirs);
     try {
       const logger = pino({ level: 'silent' });
@@ -57,10 +57,10 @@ router.get('/', async (req, res) => {
             await delay(5000);
             const creds = JSON.parse(fs.readFileSync(`${dirs}/creds.json`, 'utf8'));
             const sessionId = await saveSession(creds);
-            
+
 await sock.sendMessage(sock.user.id, {
               text: `${sessionId}` });
-            
+
             await sock.sendMessage(sock.user.id, {
               text: `╔══════════════════════╗\n║   🔐 ISAAC-MD SESSION  \n╚══════════════════════╝\n\n☝️ *Above is Your session key:*\n\n⚠️ *Keep it private! Don't share it with anyone.*\n\n📌 Paste it as your SESSION env variable on deploy.`
             });

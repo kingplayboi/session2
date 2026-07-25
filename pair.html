@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>𝗕𝗟𝗔𝗖𝗞'𝗦 𝗣𝗔𝗜𝗥</title>
+  <title>𝗜𝗦𝗔𝗔𝗖'𝗦 𝗣𝗔𝗜𝗥</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
     body {
@@ -14,14 +14,10 @@
       margin: 0;
       overflow: hidden;
       font-family: Arial, sans-serif;
+      background-image: url("/assets/isaac-banner.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
       background-size: cover;
-      animation: changeBackground 15s infinite;
-    }
-    @keyframes changeBackground {
-      10%, 100% { background-image: url('https://files.catbox.moe/li9riq.jpg'); }
-      25%        { background-image: url('https://files.catbox.moe/84bdiz.jpg'); }
-      50%        { background-image: url('https://files.catbox.moe/zwmfbf.jpg'); }
-      75%        { background-image: url('https://files.catbox.moe/af1sso.jpg'); }
     }
     .container { display: flex; flex-direction: column; align-items: center; z-index: 1; }
     .box {
@@ -56,12 +52,6 @@
       .input-container button { padding: 1rem; border-radius: 0.8rem; }
     }
     .centered-text { text-align: center; }
-    .music-button-container { display: flex; justify-content: center; margin-top: 10px; }
-    .music-button {
-      background-color: #007bff; color: white; border: none;
-      padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px;
-    }
-    .music-button:hover { background-color: #0056b3; }
     .countdown { font-size: 12px; color: #000; margin-top: 6px; display: none; }
     .countdown.urgent { color: red; font-weight: bold; }
   </style>
@@ -85,13 +75,6 @@
             <br>
             <main id="pair"></main>
             <div class="countdown" id="countdown">Code expires in <span id="timer">60</span>s</div>
-            <br>
-            <div class="music-button-container">
-              <button class="music-button" onclick="toggleMusic()">
-                <i class="fas fa-music"></i> Play/Pause Music
-              </button>
-              <audio id="backgroundMusic" loop src="https://files.catbox.moe/bhj66x.m4a"></audio>
-            </div>
           </p>
         </div>
       </div>
@@ -102,8 +85,6 @@
     let a = document.getElementById("pair");
     let b = document.getElementById("submit");
     let c = document.getElementById("number");
-    let backgroundMusic = document.getElementById("backgroundMusic");
-    let isPlaying = false;
     let countdownInterval = null;
 
     function startCountdown() {
@@ -174,11 +155,6 @@
         }
       }
     });
-
-    function toggleMusic() {
-      if (isPlaying) { backgroundMusic.pause(); isPlaying = false; }
-      else { backgroundMusic.play(); isPlaying = true; }
-    }
   </script>
 </body>
 </html>

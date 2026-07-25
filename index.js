@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 const PORT = process.env.PORT || 8000;
 
 import('events').then(e => { e.EventEmitter.defaultMaxListeners = 500; });

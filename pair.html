@@ -54,6 +54,12 @@
     .centered-text { text-align: center; }
     .countdown { font-size: 12px; color: #000; margin-top: 6px; display: none; }
     .countdown.urgent { color: red; font-weight: bold; }
+    .btn {
+      background: linear-gradient(135deg, #ff9500 0%, #ff6a00 100%);
+      color: white; border: none; border-radius: 8px;
+      font-weight: bold; cursor: pointer; font-size: 14px;
+    }
+    .btn:hover { filter: brightness(1.1); }
   </style>
 </head>
 <body>
@@ -75,6 +81,9 @@
             <br>
             <main id="pair"></main>
             <div class="countdown" id="countdown">Code expires in <span id="timer">60</span>s</div>
+            <br>
+            <audio id="bgAudio" src="/assets/isaac-track.mp3" loop></audio>
+            <button id="playBtn" onclick="toggleAudio()" class="btn" style="width:auto; padding:0.6em 1.5em; margin-top:10px;">▶ Play</button>
           </p>
         </div>
       </div>
@@ -86,6 +95,18 @@
     let b = document.getElementById("submit");
     let c = document.getElementById("number");
     let countdownInterval = null;
+
+    const bgAudio = document.getElementById('bgAudio');
+    const playBtn = document.getElementById('playBtn');
+    function toggleAudio() {
+      if (bgAudio.paused) {
+        bgAudio.play();
+        playBtn.textContent = '⏸ Pause';
+      } else {
+        bgAudio.pause();
+        playBtn.textContent = '▶ Play';
+      }
+    }
 
     function startCountdown() {
       const countdownEl = document.getElementById('countdown');

@@ -1,7 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import pino from 'pino';
-import { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, delay, makeCacheableSignalKeyStore, Browsers } from '@whiskeysockets/baileys';
+import { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, delay, makeCacheableSignalKeyStore, Browsers, jidNormalizedUser } from '@whiskeysockets/baileys';
 import { saveSession } from './db.js';
 
 const router = express.Router();
@@ -53,18 +53,20 @@ router.get('/', async (req, res) => {
       sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
         if (connection === 'open') {
           try {
-            await sock.sendMessage(sock.user.id, {
+            const selfJid = jidNormalizedUser(sock.user.id);
+
+            await sock.sendMessage(selfJid, {
       text: ` 🔄 Succesfully Connected! Your session is being generated...\n\n⏳ Please wait *40-50 seconds* — do not close this chat.\n\n> This is normal. Your session key will appear below once ready.`
     });
             await delay(45000);
             const creds = JSON.parse(fs.readFileSync(`${dirs}/creds.json`, 'utf8'));
             const sessionId = await saveSession(creds);
 
-const sessionMsg = await sock.sendMessage(sock.user.id, {
+const sessionMsg = await sock.sendMessage(selfJid, {
   text: `${sessionId}`
 });
 
-await sock.sendMessage(sock.user.id, {
+await sock.sendMessage(selfJid, {
   text: `╔══════════════════════╗\n║   🔐 ISAAC-MD SESSION  \n╚══════════════════════╝\n\n☝️ *Above is Your session key.*\n\n⚠️ *Keep it private! Don't share it with anyone.*\n\n📌 Paste it as your SESSION env variable on deploy.`
 }, { quoted: sessionMsg });
 

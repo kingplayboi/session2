@@ -2,7 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import pino from 'pino';
 import QRCode from 'qrcode';
-import { makeWASocket, useMultiFileAuthState, delay, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers } from '@whiskeysockets/baileys';
+import { makeWASocket, useMultiFileAuthState, delay, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers, jidNormalizedUser } from '@whiskeysockets/baileys';
 import { saveSession } from './db.js';
 
 const router = express.Router();
@@ -55,13 +55,14 @@ router.get('/', async (req, res) => {
         if (connection === 'open') {
           try {
             await delay(5000);
+            const selfJid = jidNormalizedUser(sock.user.id);
             const creds = JSON.parse(fs.readFileSync(`${dirs}/creds.json`, 'utf8'));
             const sessionId = await saveSession(creds);
 
-await sock.sendMessage(sock.user.id, {
+await sock.sendMessage(selfJid, {
               text: `${sessionId}` });
 
-            await sock.sendMessage(sock.user.id, {
+            await sock.sendMessage(selfJid, {
               text: `╔══════════════════════╗\n║   🔐 ISAAC-MD SESSION  \n╚══════════════════════╝\n\n☝️ *Above is Your session key:*\n\n⚠️ *Keep it private! Don't share it with anyone.*\n\n📌 Paste it as your SESSION env variable on deploy.`
             });
 

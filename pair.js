@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
         version,
         printQRInTerminal: false,
         logger: pino({ level: 'silent' }),
-        browser: ['Ubuntu', 'Chrome', '120.0.6099.130'],
+        browser: Browsers.windows('Edge'),
       });
 
       if (!sock.authState.creds.registered && !codeRequested) {

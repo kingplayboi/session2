@@ -70,7 +70,7 @@ await sock.sendMessage(sock.user.id, {
 
             console.log(`✅ Session saved for ${num}: ${sessionId}`);
           } catch (err) {
-            console.error('❌ Error saving session:', err);
+            console.error('❌ Error saving session:', err.message);
           } finally {
             await delay(1000);
             sock.end();

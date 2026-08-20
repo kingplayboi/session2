@@ -2,7 +2,15 @@ import express from 'express';
 import fs from 'fs';
 import pino from 'pino';
 import QRCode from 'qrcode';
-import { makeWASocket, useMultiFileAuthState, delay, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers, jidNormalizedUser } from '@whiskeysockets/baileys';
+import { 
+  makeWASocket, 
+  useMultiFileAuthState, 
+  delay, 
+  fetchLatestBaileysVersion, 
+  makeCacheableSignalKeyStore, 
+  Browsers, 
+  jidNormalizedUser 
+} from '@whiskeysockets/baileys';
 import { saveSession } from './db.js';
 
 const router = express.Router();
@@ -20,6 +28,7 @@ router.get('/', async (req, res) => {
   const timeout = setTimeout(() => {
     if (!res.headersSent) {
       res.status(504).send('QR timeout — please refresh');
+      removeFile(dirs);
     }
   }, 25000);
 
@@ -27,10 +36,11 @@ router.get('/', async (req, res) => {
   const MAX_RETRIES = 3;
 
   async function initiateSession() {
-    const { version } = await fetchLatestBaileysVersion();
-    const { state, saveCreds } = await useMultiFileAuthState(dirs);
     try {
+      const { version } = await fetchLatestBaileysVersion();
+      const { state, saveCreds } = await useMultiFileAuthState(dirs);
       const logger = pino({ level: 'silent' });
+
       const sock = makeWASocket({
         auth: {
           creds: state.creds,
@@ -39,7 +49,7 @@ router.get('/', async (req, res) => {
         version,
         printQRInTerminal: false,
         logger,
-        browser: Browsers.macOS('Desktop'),
+        browser: Browsers.macOS('Safari'), // Fixed for Baileys v7
       });
 
       sock.ev.on('creds.update', saveCreds);
@@ -47,20 +57,23 @@ router.get('/', async (req, res) => {
       sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
         if (qr && !res.headersSent) {
           clearTimeout(timeout);
-          const buf = await QRCode.toBuffer(qr);
-          res.setHeader('Content-Type', 'image/png');
-          res.end(buf);
+          try {
+            const buf = await QRCode.toBuffer(qr);
+            res.setHeader('Content-Type', 'image/png');
+            res.end(buf);
+          } catch (qrErr) {
+            console.error('QR Buffer Error:', qrErr);
+          }
         }
 
         if (connection === 'open') {
           try {
-            await delay(5000);
+            await delay(3000);
             const selfJid = jidNormalizedUser(sock.user.id);
             const creds = JSON.parse(fs.readFileSync(`${dirs}/creds.json`, 'utf8'));
             const sessionId = await saveSession(creds);
 
-await sock.sendMessage(selfJid, {
-              text: `${sessionId}` });
+            await sock.sendMessage(selfJid, { text: `${sessionId}` });
 
             await sock.sendMessage(selfJid, {
               text: `╔══════════════════════╗\n║   🔐 ISAAC-MD SESSION  \n╚══════════════════════╝\n\n☝️ *Above is Your session key:*\n\n⚠️ *Keep it private! Don't share it with anyone.*\n\n📌 Paste it as your SESSION env variable on deploy.`
@@ -71,24 +84,28 @@ await sock.sendMessage(selfJid, {
             console.error('❌ Error saving session:', err.message);
           } finally {
             await delay(1000);
-            sock.end();
+            sock.ws?.close();
             removeFile(dirs);
           }
         } else if (connection === 'close') {
           const code = lastDisconnect?.error?.output?.statusCode;
           if (code !== 401 && retryCount < MAX_RETRIES) {
             retryCount++;
-            await delay(5000);
+            await delay(3000);
             initiateSession();
           } else {
             removeFile(dirs);
+            if (!res.headersSent) {
+              clearTimeout(timeout);
+              res.status(503).send('Connection Closed');
+            }
           }
         }
       });
 
     } catch (err) {
       clearTimeout(timeout);
-      console.error('Error:', err.message);
+      console.error('Error initiating session:', err.message);
       if (!res.headersSent) res.status(503).send('Service Unavailable');
       removeFile(dirs);
     }
@@ -98,3 +115,4 @@ await sock.sendMessage(selfJid, {
 });
 
 export default router;
+
